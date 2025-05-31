@@ -20,9 +20,10 @@ router.get('/', async (req, res) => {
 // @desc    Add a new task
 // @access  Public
 router.post('/', async (req, res) => {
-    const { name, description, dueDate } = req.body; // Include description here
+    // destructure req.body to include 'list'
+    const { name, description, dueDate, list } = req.body;
 
-    // Basic validation
+    // Basic validation (list is now optional with a default)
     if (!name || !dueDate) {
         return res.status(400).json({ msg: 'Please enter all required fields (name and dueDate)' });
     }
@@ -30,8 +31,9 @@ router.post('/', async (req, res) => {
     try {
         const newTask = new Task({
             name,
-            description, // Save the description
-            dueDate
+            description,
+            dueDate,
+            list // Save the list
         });
 
         const task = await newTask.save();
@@ -43,17 +45,19 @@ router.post('/', async (req, res) => {
 });
 
 // @route   PUT api/tasks/:id
-// @desc    Update a task (e.g., mark as complete/incomplete, update description)
+// @desc    Update a task (e.g., mark as complete/incomplete, update description, update list)
 // @access  Public
 router.put('/:id', async (req, res) => {
-    const { name, description, dueDate, completed } = req.body; // Include description here
+    // destructure req.body to include 'list'
+    const { name, description, dueDate, completed, list } = req.body;
     const taskId = req.params.id;
 
     const updateFields = {};
     if (name !== undefined) updateFields.name = name;
-    if (description !== undefined) updateFields.description = description; // Update description
+    if (description !== undefined) updateFields.description = description;
     if (dueDate !== undefined) updateFields.dueDate = dueDate;
     if (completed !== undefined) updateFields.completed = completed;
+    if (list !== undefined) updateFields.list = list; // Update list
 
     try {
         const task = await Task.findByIdAndUpdate(

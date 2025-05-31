@@ -382,6 +382,38 @@ aside input[type="text"] {
     padding-left: 2.5rem;
 }
 
+/* Light theme specific styles for the dialog box */
+.dialog-box {
+    background-color: #ffffff;
+    /* White background for light theme */
+    color: #1f2937;
+    /* Dark text for light theme */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dialog-message {
+    color: #1f2937;
+    /* Ensure paragraph text is dark in light theme */
+}
+
+/* Calendar View Mode Buttons (Light Theme) */
+/* The general text-gray-700 and hover:bg-gray-300 are already there from Tailwind,
+   but we're being explicit about the active state. */
+#calendarDayBtn,
+#calendarWeekBtn,
+#calendarMonthBtn {
+    color: #4a5568;
+    /* Darker text for light theme calendar buttons */
+}
+
+#calendarDayBtn.bg-blue-100,
+#calendarWeekBtn.bg-blue-100,
+#calendarMonthBtn.bg-blue-100 {
+    color: #1d4ed8;
+    /* Darker blue for active button text in light theme */
+}
+
+
 /* Gemini-like Dark Theme Styles */
 html.dark {
 
@@ -462,27 +494,27 @@ html.dark {
         color: #e8eaed;
     }
 
-    #taskInput,
-    #taskDescriptionInput,
-    #dueDateInput {
+    #addTaskSection input,
+    #addTaskSection textarea,
+    #addTaskSection select {
         background-color: #3c4043;
         border-color: #3c4043;
         color: #e8eaed;
     }
 
-    #taskInput::placeholder,
-    #taskDescriptionInput::placeholder {
+    #addTaskSection input::placeholder,
+    #addTaskSection textarea::placeholder {
         color: #9aa0a6;
     }
 
-    #addTaskBtn {
+    #addTaskSection button {
         background-color: #8ab4f8;
         /* Google Blue light */
         color: #202124;
         /* Dark text on button */
     }
 
-    #addTaskBtn:hover {
+    #addTaskSection button:hover {
         background-color: #669df6;
         /* Darker Google Blue on hover */
     }
@@ -617,7 +649,9 @@ html.dark {
     #detailTaskName,
     #detailDescription,
     #detailList,
-    #detailDueDate {
+    #detailDueDate,
+    #detailDueTime {
+        /* Include detailDueTime */
         background-color: #3c4043;
         border-color: #3c4043;
         color: #e8eaed;
@@ -666,37 +700,55 @@ html.dark {
         color: #9aa0a6;
     }
 
-    /* Dark theme for the delete confirmation dialogue box */
-    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-white {
+    /* Light theme specific styles for the dialog box */
+    .dialog-box {
+        background-color: #ffffff;
+        /* White background for light theme */
+        color: #1f2937;
+        /* Dark text for light theme */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .dialog-message {
+        color: #1f2937;
+        /* Ensure paragraph text is dark in light theme */
+    }
+
+    /* Dark theme specific styles for the dialog box */
+    html.dark .dialog-box {
         background-color: #2b2c2e;
         /* Darker background for the dialogue box */
         color: #e8eaed;
         /* Light text color for the message */
     }
 
-    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-white p {
+    html.dark .dialog-message {
         color: #e8eaed;
-        /* Ensure paragraph text is visible */
+        /* Ensure paragraph text is light in dark theme */
     }
 
     /* Adjust button styles within the dark dialogue box */
-    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-red-600 {
+    html.dark #confirmDeleteYes {
+        /* Target by ID for higher specificity */
         background-color: #c53929;
         /* Darker red for delete button */
+        color: white;
+        /* Ensure text is white */
     }
 
-    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-red-600:hover {
+    html.dark #confirmDeleteYes:hover {
         background-color: #a52714;
     }
 
-    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-gray-300 {
+    html.dark #confirmDeleteNo {
+        /* Target by ID for higher specificity */
         background-color: #5f6368;
         /* Darker gray for cancel button */
         color: #e8eaed;
         /* Light text for cancel button */
     }
 
-    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-gray-300:hover {
+    html.dark #confirmDeleteNo:hover {
         background-color: #70757a;
     }
 }

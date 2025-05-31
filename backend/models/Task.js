@@ -21,6 +21,12 @@ const TaskSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    list: { // New: Field for task list/category
+        type: String,
+        required: false, // List is optional
+        default: 'Personal', // Default list
+        trim: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
