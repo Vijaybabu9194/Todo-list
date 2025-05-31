@@ -1,0 +1,702 @@
+/* style.css */
+
+/* Ensure the body takes full height and uses flexbox for layout */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar styling */
+aside {
+    flex-shrink: 0;
+}
+
+/* Main content area styling */
+main {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Task List Item Styling */
+.task-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.task-item:hover {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.task-item.completed {
+    text-decoration: line-through;
+    color: #9ca3af;
+    background-color: #e0e7ff;
+    border-color: #c7d2fe;
+}
+
+.task-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.task-name {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.task-date {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* Task List Item Hover Menu */
+.task-list-item-menu {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, height 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.task-item:hover .task-list-item-menu {
+    opacity: 1;
+    visibility: visible;
+    height: auto;
+}
+
+.task-list-item-menu button {
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.task-list-item-menu button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Specific button colors */
+.task-list-item-menu .view-task-btn {
+    background-color: #60a5fa;
+}
+
+.task-list-item-menu .view-task-btn:hover {
+    background-color: #3b82f6;
+}
+
+.task-list-item-menu .update-task-btn {
+    background-color: #22c55e;
+}
+
+.task-list-item-menu .update-task-btn:hover {
+    background-color: #16a34a;
+}
+
+.task-list-item-menu .mark-done-btn {
+    background-color: #f97316;
+}
+
+.task-list-item-menu .mark-done-btn:hover {
+    background-color: #ea580c;
+}
+
+.task-list-item-menu .delete-task-btn {
+    background-color: #ef4444;
+}
+
+.task-list-item-menu .delete-task-btn:hover {
+    background-color: #dc2626;
+}
+
+/* --- Calendar View Specific Styles --- */
+.calendar-grid-container {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background-color: #ffffff;
+    font-size: 0.875rem;
+    line-height: 1.2;
+}
+
+.time-column {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #eee;
+    background-color: #fcfcfc;
+}
+
+.time-slot {
+    height: 48px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 0.7rem;
+    color: #a0a0a0;
+    border-bottom: 1px dashed #f5f5f5;
+    padding-top: 4px;
+    position: relative;
+}
+
+.time-slot:last-child {
+    border-bottom: none;
+}
+
+/* Current time indicator line */
+.time-slot .current-time-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #ea4335;
+    z-index: 20;
+    border-radius: 9999px;
+}
+
+.days-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    position: relative;
+}
+
+.calendar-day-column {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #eee;
+    position: relative;
+}
+
+.calendar-day-column:last-child {
+    border-right: none;
+}
+
+.day-header {
+    text-align: center;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #fdfdfd;
+    font-weight: 500;
+    color: #5f6368;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.day-header .day-name {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.day-header .day-number {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #202124;
+    margin-top: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.day-header.current-day-header .day-number {
+    background-color: #4285F4;
+    color: white;
+}
+
+.day-grid-slot {
+    height: 48px;
+    border-bottom: 1px dashed #f5f5f5;
+    position: relative;
+}
+
+.day-grid-slot:last-child {
+    border-bottom: none;
+}
+
+.calendar-task-event {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    background-color: #A8C4D9;
+    color: white;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.1s ease-in-out;
+}
+
+.calendar-task-event:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-task-event.completed {
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
+/* Sticky Wall View Specific Styles */
+.sticky-note {
+    background-color: #fff;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.sticky-note:hover {
+    transform: translateY(-5px);
+}
+
+.sticky-note h3 {
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+}
+
+.sticky-note p {
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+.sticky-note .sticky-date {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+    text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    aside {
+        display: none;
+    }
+
+    .md\\:hidden {
+        display: block;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    #taskDetailPane {
+        display: none;
+    }
+
+    .calendar-grid-container {
+        grid-template-columns: 40px 1fr;
+    }
+
+    .time-slot,
+    .day-grid-slot {
+        height: 36px;
+    }
+
+    .calendar-task-event {
+        font-size: 0.6rem;
+        padding: 1px 2px;
+    }
+
+    .day-header .day-name {
+        font-size: 0.7rem;
+    }
+
+    .day-header .day-number {
+        font-size: 1.1rem;
+        width: 24px;
+        height: 24px;
+    }
+
+    .task-list-item-menu button {
+        font-size: 0.6rem;
+        padding: 4px 6px;
+    }
+
+    .task-item:hover .task-content {
+        margin-right: 0;
+    }
+}
+
+@media (min-width: 768px) {
+    body {
+        display: flex;
+    }
+
+    aside {
+        display: block;
+    }
+}
+
+/* Specific styles for the search input in the sidebar */
+aside input[type="text"] {
+    padding-left: 2.5rem;
+}
+
+/* Gemini-like Dark Theme Styles */
+html.dark {
+
+    /* General backgrounds and text */
+    body {
+        background-color: #202124;
+        /* Deep charcoal gray for body */
+        color: #e8eaed;
+        /* Light gray for main text */
+    }
+
+    aside {
+        background-color: #2b2c2e;
+        /* Slightly lighter charcoal for sidebar */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.24);
+    }
+
+    aside .mb-8 h2,
+    aside .mb-8 h3 {
+        color: #bdc1c6;
+        /* Lighter gray for menu titles */
+    }
+
+    /* Search input in sidebar */
+    aside input[type="text"] {
+        background-color: #3c4043;
+        border-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    aside input[type="text"]::placeholder {
+        color: #9aa0a6;
+    }
+
+    aside .fa-search {
+        color: #9aa0a6;
+    }
+
+    /* Navigation links in sidebar */
+    aside nav ul li a {
+        color: #bdc1c6;
+    }
+
+    aside nav ul li a:hover {
+        background-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    aside nav ul li a.bg-blue-100 {
+        /* Active link - mimicking a softer Google blue */
+        background-color: #8ab4f8;
+        /* Google Blue light */
+        color: #202124;
+        /* Dark text on light blue */
+    }
+
+    aside nav ul li a span {
+        color: #9aa0a6;
+        /* Count text */
+    }
+
+    /* Main header */
+    main header h1 {
+        color: #e8eaed;
+    }
+
+    main header button {
+        color: #bdc1c6;
+    }
+
+    /* Add Task Section */
+    #addTaskSection {
+        background-color: #2b2c2e;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.24);
+    }
+
+    #addTaskSection h2 {
+        color: #e8eaed;
+    }
+
+    #taskInput,
+    #taskDescriptionInput,
+    #dueDateInput {
+        background-color: #3c4043;
+        border-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    #taskInput::placeholder,
+    #taskDescriptionInput::placeholder {
+        color: #9aa0a6;
+    }
+
+    #addTaskBtn {
+        background-color: #8ab4f8;
+        /* Google Blue light */
+        color: #202124;
+        /* Dark text on button */
+    }
+
+    #addTaskBtn:hover {
+        background-color: #669df6;
+        /* Darker Google Blue on hover */
+    }
+
+    /* Task List */
+    .task-item {
+        background-color: #2b2c2e;
+        border-color: #3c4043;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .task-item:hover {
+        background-color: #3c4043;
+        border-color: #8ab4f8;
+    }
+
+    .task-item.completed {
+        background-color: #3c4043;
+        border-color: #8ab4f8;
+        color: #9aa0a6;
+    }
+
+    .task-content p {
+        color: #e8eaed;
+    }
+
+    .task-content p.text-gray-500 {
+        color: #9aa0a6;
+    }
+
+    .task-content p.text-gray-400 {
+        color: #707070;
+    }
+
+    .task-list-item-menu {
+        border-top-color: #3c4043;
+    }
+
+    /* Calendar View */
+    #calendarView {
+        background-color: #2b2c2e;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.24);
+    }
+
+    #calendarView button {
+        background-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    #calendarView button:hover {
+        background-color: #5f6368;
+    }
+
+    #calendarView button.bg-blue-100 {
+        background-color: #8ab4f8;
+        /* Google Blue light */
+        color: #202124;
+        /* Dark text on button */
+    }
+
+    #currentPeriodRange {
+        color: #e8eaed;
+    }
+
+    .calendar-grid-container {
+        background-color: #202124;
+        border-color: #3c4043;
+    }
+
+    .time-column {
+        background-color: #2b2c2e;
+        border-right-color: #3c4043;
+    }
+
+    .time-slot {
+        color: #9aa0a6;
+        border-bottom-color: #2b2c2e;
+    }
+
+    .day-header {
+        background-color: #2b2c2e;
+        border-bottom-color: #3c4043;
+        color: #bdc1c6;
+    }
+
+    .day-header .day-number {
+        color: #e8eaed;
+    }
+
+    .day-header.current-day-header .day-number {
+        background-color: #8ab4f8;
+        color: #202124;
+    }
+
+    .calendar-day-column {
+        border-right-color: #3c4043;
+    }
+
+    .day-grid-slot {
+        border-bottom-color: #2b2c2e;
+    }
+
+    /* Sticky Wall */
+    .sticky-note {
+        /* Keep original background-color for visual variety, but set text color for dark theme */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Subtle white border for visibility */
+    }
+
+    html.dark .sticky-note h3,
+    html.dark .sticky-note p,
+    html.dark .sticky-note .sticky-date {
+        color: #202124;
+        /* Dark text for readability on the random light backgrounds */
+    }
+
+
+    /* Task Detail Pane */
+    #taskDetailPane {
+        background-color: #2b2c2e;
+        box-shadow: -4px 0 6px -1px rgba(0, 0, 0, 0.4), -2px 0 4px -1px rgba(0, 0, 0, 0.24);
+    }
+
+    #taskDetailPane h2 {
+        color: #e8eaed;
+    }
+
+    #taskDetailPane label {
+        color: #bdc1c6;
+    }
+
+    #detailTaskName,
+    #detailDescription,
+    #detailList,
+    #detailDueDate {
+        background-color: #3c4043;
+        border-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    #detailTaskName::placeholder,
+    #detailDescription::placeholder {
+        color: #9aa0a6;
+    }
+
+    #detailTagsSection span {
+        background-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    #detailTagsSection button {
+        background-color: #8ab4f8;
+        /* Google Blue light */
+        color: #202124;
+    }
+
+    #detailTagsSection button:hover {
+        background-color: #669df6;
+    }
+
+    #detailSubtasksSection input[type="text"] {
+        background-color: #3c4043;
+        border-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    #detailSubtasksSection input[type="text"]::placeholder {
+        color: #9aa0a6;
+    }
+
+    #detailSubtasksSection .fa-plus {
+        color: #8ab4f8;
+    }
+
+    #detailSubtasksSection .text-gray-800 {
+        color: #e8eaed;
+    }
+
+    #noTasksMessage,
+    #noStickyNotesMessage {
+        color: #9aa0a6;
+    }
+
+    /* Dark theme for the delete confirmation dialogue box */
+    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-white {
+        background-color: #2b2c2e;
+        /* Darker background for the dialogue box */
+        color: #e8eaed;
+        /* Light text color for the message */
+    }
+
+    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-white p {
+        color: #e8eaed;
+        /* Ensure paragraph text is visible */
+    }
+
+    /* Adjust button styles within the dark dialogue box */
+    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-red-600 {
+        background-color: #c53929;
+        /* Darker red for delete button */
+    }
+
+    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-red-600:hover {
+        background-color: #a52714;
+    }
+
+    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-gray-300 {
+        background-color: #5f6368;
+        /* Darker gray for cancel button */
+        color: #e8eaed;
+        /* Light text for cancel button */
+    }
+
+    html.dark .fixed.inset-0.bg-black.bg-opacity-50 .bg-gray-300:hover {
+        background-color: #70757a;
+    }
+}
