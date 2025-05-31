@@ -57,13 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = 'http://localhost:3000/api/tasks';
 
     let currentSelectedTask = null;
-    let currentFilter = 'today';
+    let currentFilter = localStorage.getItem('lastFilter') || 'addTask'; // Initialize from localStorage or default to 'addTask'
     let currentFilterList = null; // Stores the name of the currently selected list filter
     let allTasksData = [];
     let currentCalendarDate = new Date();
     let calendarViewMode = 'day';
     // Initial default lists
-    let availableLists = new Set(['Personal', 'Work', 'Groceries', 'Home']);
+    let availableLists = new Set(); // Changed to initialize empty, will load from localStorage
 
     const timeSlotHeight = 48;
     const calendarEventColor = '#A8C4D9';
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
             taskList.classList.remove('hidden');
             renderTaskList(tasksToDisplay);
         }
-
+        localStorage.setItem('lastFilter', currentFilter); // Save the current filter to localStorage
         updateSidebarActiveLink();
         updateCalendarViewModeButtons();
         updateSidebarListTheme();
@@ -552,7 +552,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             allTasksData = await response.json();
-            updateAvailableLists();
+            loadAvailableLists(); // Load lists from local storage
+            updateAvailableListsFromTasks(); // Add lists from existing tasks
             populateListDropdowns();
             renderSidebarLists(); // This calls updateSidebarListTheme, which calls updateSidebarActiveLink
             renderCurrentView(); // This calls updateSidebarActiveLink and updateCalendarViewModeButtons
@@ -566,23 +567,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to load lists from localStorage
+    function loadAvailableLists() {
+        const storedLists = localStorage.getItem('availableLists');
+        if (storedLists) {
+            availableLists = new Set(JSON.parse(storedLists));
+        } else {
+            // Default lists if no lists are found in localStorage
+            availableLists = new Set(['Personal', 'Work', 'Groceries', 'Home']);
+            saveAvailableLists(); // Save defaults to localStorage
+        }
+    }
 
-    function updateAvailableLists() {
+    // Function to save lists to localStorage
+    function saveAvailableLists() {
+        localStorage.setItem('availableLists', JSON.stringify(Array.from(availableLists)));
+    }
+
+    function updateAvailableListsFromTasks() {
         // Collect all unique lists from existing tasks
         allTasksData.forEach(task => {
             if (task.list) {
                 availableLists.add(task.list);
             }
         });
-        // Sort alphabetically
+        // Sort alphabetically, keeping 'Personal' and 'Work' at the top
         availableLists = new Set(Array.from(availableLists).sort((a, b) => {
-            // Keep 'Personal' and 'Work' at the top if they exist
             if (a === 'Personal') return -1;
             if (b === 'Personal') return 1;
             if (a === 'Work') return -1;
             if (b === 'Work') return 1;
             return a.localeCompare(b);
         }));
+        saveAvailableLists(); // Save updated lists to localStorage
     }
 
     function populateListDropdowns() {
@@ -625,6 +642,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="w-3 h-3 ${getListColorClass(listName)} rounded-full mr-2"></span> ${listName} <span
                         class="ml-auto text-sm sidebar-list-count">${listCounts[listName] || 0}</span>
                 </a>
+                ${listName !== 'Personal' && listName !== 'Work' && listName !== 'Groceries' && listName !== 'Home' ? // Only show delete for user-created lists
+                    `<button class="delete-list-btn text-red-500 hover:text-red-700 ml-2" data-list="${listName}">
+                    <i class="fas fa-trash"></i>
+                </button>` : ''
+                }
             `;
             listMenu.insertBefore(listItem, addNewListLi); // Insert before "Add New List"
         });
@@ -638,6 +660,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderCurrentView();
             });
         });
+
+        // Add event listeners to delete list buttons
+        listMenu.querySelectorAll('.delete-list-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent the list filter from activating
+                const listToDelete = e.currentTarget.dataset.list;
+                deleteList(listToDelete);
+            });
+        });
+
         // Apply theme styles to sidebar lists after rendering
         updateSidebarListTheme();
     }
@@ -650,6 +682,82 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'home': return 'bg-purple-500';
             default: return 'bg-gray-400';
         }
+    }
+
+    async function deleteList(listName) {
+        const confirmDelete = document.createElement('div');
+        confirmDelete.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        confirmDelete.innerHTML = `
+            <div class="dialog-box p-6 rounded-lg shadow-xl text-center">
+                <p class="dialog-message mb-4 text-lg">Are you sure you want to delete the list "${listName}"? All tasks in this list will also be deleted.</p>
+                <button id="confirmDeleteListYes" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg mr-2">Yes, Delete List</button>
+                <button id="confirmDeleteListNo" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">No, Cancel</button>
+            </div>
+        `;
+        document.body.appendChild(confirmDelete);
+
+        const isDark = htmlElement.classList.contains('dark');
+        const dialogBox = confirmDelete.querySelector('.dialog-box');
+        const dialogMessage = confirmDelete.querySelector('.dialog-message');
+        const confirmYesBtn = confirmDelete.querySelector('#confirmDeleteListYes');
+        const confirmNoBtn = confirmDelete.querySelector('#confirmDeleteListNo');
+
+        if (isDark) {
+            dialogBox.style.backgroundColor = '#2b2c2e';
+            dialogBox.style.color = '#e8eaed';
+            dialogMessage.style.color = '#e8eaed';
+            confirmYesBtn.style.backgroundColor = '#c53929';
+            confirmYesBtn.style.color = 'white';
+            confirmNoBtn.style.backgroundColor = '#5f6368';
+            confirmNoBtn.style.color = '#e8eaed';
+        } else {
+            dialogBox.style.backgroundColor = '#ffffff';
+            dialogBox.style.color = '#1f2937';
+            dialogMessage.style.color = '#1f2937';
+            confirmYesBtn.style.backgroundColor = '#dc2626';
+            confirmYesBtn.style.color = 'white';
+            confirmNoBtn.style.backgroundColor = '#d1d5db';
+            confirmNoBtn.style.color = '#1f2937';
+        }
+
+        document.getElementById('confirmDeleteListYes').addEventListener('click', async () => {
+            try {
+                // Delete tasks associated with this list first
+                const tasksInList = allTasksData.filter(task => task.list === listName);
+                for (const task of tasksInList) {
+                    await fetch(`${API_BASE_URL}/${task._id}`, { method: 'DELETE' });
+                }
+
+                // Now delete the list itself
+                availableLists.delete(listName);
+                saveAvailableLists(); // Save updated lists to localStorage
+
+                const messageBox = document.createElement('div');
+                messageBox.className = 'fixed top-4 right-4 bg-green-500 text-white p-3 rounded-lg shadow-lg';
+                messageBox.textContent = `List "${listName}" and its tasks deleted successfully!`;
+                document.body.appendChild(messageBox);
+                setTimeout(() => messageBox.remove(), 3000);
+
+                confirmDelete.remove();
+                if (currentFilterList === listName) {
+                    currentFilter = 'today'; // Switch to 'today' view if the current list was deleted
+                    currentFilterList = null;
+                }
+                fetchAndRenderTasks(); // Re-fetch and re-render everything
+            } catch (error) {
+                console.error('Error deleting list and tasks:', error);
+                const messageBox = document.createElement('div');
+                messageBox.className = 'fixed top-4 right-4 bg-red-500 text-white p-3 rounded-lg shadow-lg';
+                messageBox.textContent = `Failed to delete list: ${error.message || 'Please try again.'}`;
+                document.body.appendChild(messageBox);
+                setTimeout(() => messageBox.remove(), 3000);
+                confirmDelete.remove();
+            }
+        });
+
+        document.getElementById('confirmDeleteListNo').addEventListener('click', () => {
+            confirmDelete.remove();
+        });
     }
 
 
@@ -1002,6 +1110,31 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         document.body.appendChild(confirmDelete);
 
+        const isDark = htmlElement.classList.contains('dark');
+        const dialogBox = confirmDelete.querySelector('.dialog-box');
+        const dialogMessage = confirmDelete.querySelector('.dialog-message');
+        const confirmYesBtn = confirmDelete.querySelector('#confirmDeleteYes');
+        const confirmNoBtn = confirmDelete.querySelector('#confirmDeleteNo');
+
+        if (isDark) {
+            dialogBox.style.backgroundColor = '#2b2c2e';
+            dialogBox.style.color = '#e8eaed';
+            dialogMessage.style.color = '#e8eaed';
+            confirmYesBtn.style.backgroundColor = '#c53929';
+            confirmYesBtn.style.color = 'white';
+            confirmNoBtn.style.backgroundColor = '#5f6368';
+            confirmNoBtn.style.color = '#e8eaed';
+        } else {
+            dialogBox.style.backgroundColor = '#ffffff';
+            dialogBox.style.color = '#1f2937';
+            dialogMessage.style.color = '#1f2937';
+            confirmYesBtn.style.backgroundColor = '#ef4444';
+            confirmYesBtn.style.color = 'white';
+            confirmNoBtn.style.backgroundColor = '#d1d5db';
+            confirmNoBtn.style.color = '#1f2937';
+        }
+
+
         document.getElementById('confirmDeleteYes').addEventListener('click', async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/${taskId}`, {
@@ -1198,6 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const trimmedList = newList.trim();
             if (!availableLists.has(trimmedList)) {
                 availableLists.add(trimmedList);
+                // Sort alphabetically, keeping 'Personal' and 'Work' at the top
                 availableLists = new Set(Array.from(availableLists).sort((a, b) => {
                     if (a === 'Personal') return -1;
                     if (b === 'Personal') return 1;
@@ -1205,6 +1339,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (b === 'Work') return 1;
                     return a.localeCompare(b);
                 }));
+                saveAvailableLists(); // Save to localStorage
                 populateListDropdowns();
                 renderSidebarLists();
                 const messageBox = document.createElement('div');
