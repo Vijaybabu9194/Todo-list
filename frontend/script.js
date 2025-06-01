@@ -643,10 +643,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         class="ml-auto text-sm sidebar-list-count">${listCounts[listName] || 0}</span>
                 </a>
                 ${listName !== 'Personal' && listName !== 'Work' && listName !== 'Groceries' && listName !== 'Home' ? // Only show delete for user-created lists
-                    `<button class="delete-list-btn text-red-500 hover:text-red-700 ml-2" data-list="${listName}">
+                `<button class="delete-list-btn text-red-500 hover:text-red-700 ml-2" data-list="${listName}">
                     <i class="fas fa-trash"></i>
                 </button>` : ''
-                }
+            }
             `;
             listMenu.insertBefore(listItem, addNewListLi); // Insert before "Add New List"
         });
