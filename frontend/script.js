@@ -54,6 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const listMenu = document.getElementById('listMenu');
     const addNewListMenuLink = document.getElementById('addNewListMenuLink');
 
+    // Search input
+    const searchInput = document.querySelector('aside input[type="text"]');
+
+
     const API_BASE_URL = 'http://localhost:3000/api/tasks';
 
     let currentSelectedTask = null;
@@ -64,6 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let calendarViewMode = 'day';
     // Initial default lists
     let availableLists = new Set(); // Changed to initialize empty, will load from localStorage
+    let currentSearchQuery = ''; // NEW: Store the current search query
+
 
     const timeSlotHeight = 48;
     const calendarEventColor = '#A8C4D9';
@@ -202,7 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
             activeLink = addTaskMenuLink;
         } else if (currentFilter === 'list' && currentFilterList) {
             activeLink = listMenu.querySelector(`[data-list="${currentFilterList}"]`);
+        } else if (currentFilter === 'search') { // NEW: Handle search filter
+            // No specific sidebar link for search, so no active state
         }
+
 
         if (activeLink) {
             // Apply active state styles
@@ -538,6 +547,15 @@ document.addEventListener('DOMContentLoaded', () => {
             mainHeaderTitle.innerHTML = `${currentFilterList} <span class="text-blue-600 ml-2">${listSpecificCount}</span>`;
             taskList.classList.remove('hidden');
             renderTaskList(tasksToDisplay);
+        } else if (currentFilter === 'search' && currentSearchQuery) { // NEW: Handle search filter
+            tasksToDisplay = allTasksData.filter(task =>
+                task.name.toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
+                (task.description && task.description.toLowerCase().includes(currentSearchQuery.toLowerCase())) ||
+                (task.list && task.list.toLowerCase().includes(currentSearchQuery.toLowerCase()))
+            );
+            mainHeaderTitle.innerHTML = `Search Results for "${currentSearchQuery}" <span class="text-blue-600 ml-2">${tasksToDisplay.length}</span>`;
+            taskList.classList.remove('hidden');
+            renderTaskList(tasksToDisplay);
         }
         localStorage.setItem('lastFilter', currentFilter); // Save the current filter to localStorage
         updateSidebarActiveLink();
@@ -643,10 +661,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         class="ml-auto text-sm sidebar-list-count">${listCounts[listName] || 0}</span>
                 </a>
                 ${listName !== 'Personal' && listName !== 'Work' && listName !== 'Groceries' && listName !== 'Home' ? // Only show delete for user-created lists
-                `<button class="delete-list-btn text-red-500 hover:text-red-700 ml-2" data-list="${listName}">
+                    `<button class="delete-list-btn text-red-500 hover:text-red-700 ml-2" data-list="${listName}">
                     <i class="fas fa-trash"></i>
                 </button>` : ''
-            }
+                }
             `;
             listMenu.insertBefore(listItem, addNewListLi); // Insert before "Add New List"
         });
@@ -657,6 +675,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 currentFilter = 'list';
                 currentFilterList = e.target.closest('a').dataset.list;
+                currentSearchQuery = ''; // Clear search query when switching to a list
+                searchInput.value = ''; // Clear search input
                 renderCurrentView();
             });
         });
@@ -1177,6 +1197,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         currentFilter = 'upcoming';
         currentFilterList = null; // Clear list filter when switching main views
+        currentSearchQuery = ''; // Clear search query when switching main views
+        searchInput.value = ''; // Clear search input
         renderCurrentView();
     });
 
@@ -1184,6 +1206,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         currentFilter = 'today';
         currentFilterList = null; // Clear list filter when switching main views
+        currentSearchQuery = ''; // Clear search query when switching main views
+        searchInput.value = ''; // Clear search input
         renderCurrentView();
     });
 
@@ -1191,6 +1215,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         currentFilter = 'completed';
         currentFilterList = null; // Clear list filter when switching main views
+        currentSearchQuery = ''; // Clear search query when switching main views
+        searchInput.value = ''; // Clear search input
         renderCurrentView();
     });
 
@@ -1198,6 +1224,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         currentFilter = 'calendar';
         currentFilterList = null; // Clear list filter when switching main views
+        currentSearchQuery = ''; // Clear search query when switching main views
+        searchInput.value = ''; // Clear search input
         currentCalendarDate = new Date(); // Reset calendar view to current date on click
         renderCurrentView();
     });
@@ -1206,6 +1234,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         currentFilter = 'stickywall';
         currentFilterList = null; // Clear list filter when switching main views
+        currentSearchQuery = ''; // Clear search query when switching main views
+        searchInput.value = ''; // Clear search input
         renderCurrentView(); // `renderCurrentView` will call `renderStickyWallView`
     });
 
@@ -1213,8 +1243,25 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         currentFilter = 'addTask';
         currentFilterList = null; // Clear list filter when switching main views
+        currentSearchQuery = ''; // Clear search query when switching main views
+        searchInput.value = ''; // Clear search input
         renderCurrentView();
     });
+
+    // NEW: Event listener for search input
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim();
+        if (query) {
+            currentFilter = 'search';
+            currentSearchQuery = query;
+        } else {
+            // If search query is empty, revert to the last non-search filter or default
+            currentSearchQuery = '';
+            currentFilter = localStorage.getItem('lastFilter') || 'addTask';
+        }
+        renderCurrentView();
+    });
+
 
     // --- Calendar Navigation Event Listeners ---
     prevPeriodBtn.addEventListener('click', () => {
